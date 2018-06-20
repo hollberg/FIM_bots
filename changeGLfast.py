@@ -39,7 +39,6 @@ def click_item(menu_item, screen_res = screen_res, menu_locations=menu_locations
     return True
 
 
-
 def map_gl(fisc_yr, gl_old, gl_new):
 
     time.sleep(1)
@@ -98,11 +97,6 @@ def map_gl(fisc_yr, gl_old, gl_new):
         print('Cycle Number ' + str(i))
         time.sleep(5)
 
-        # Jiggle mouse to keep screen awake
-        bot.moveTo(100,100, duration=.25)
-        bot.moveTo(200,200, duration=.25)
-        bot.press('F15')
-
         # Check to see if an error box pops up; click "OK" if it does
         gl_error_box_xy = \
             bot.locateOnScreen('img/' +
@@ -126,7 +120,8 @@ def map_gl(fisc_yr, gl_old, gl_new):
 
 
 for entry in yrdata.mapping:
-    gl_yr = entry[0]
-    old_gl = entry[1]
-    new_gl = entry[2]
+    gl_yr, old_gl, new_gl = entry
+    # gl_yr = entry[0]
+    # old_gl = entry[1]
+    # new_gl = entry[2]
     map_gl(fisc_yr=gl_yr, gl_old=old_gl, gl_new=new_gl)
