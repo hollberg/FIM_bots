@@ -1,4 +1,4 @@
-"""profile_merge.py
+"""prof_merge_fastpy
 Pass 2 column list of FIMS IDs; merge first into the second"""
 
 import pyautogui as bot
@@ -6,6 +6,32 @@ import pandas as pd
 import xlrd
 import time
 import gui_tools as gt
+
+screen_res = str(bot.size()[0]) + 'x' + str(bot.size()[1])
+
+# Dict of dicts, storing (x,y) location of menu item for a given screen
+# resolution (assumes FIMS is running at full screen).
+# Format is: {'MENU LOCATION': {ScreenResolution: (X,Y)}}
+menu_locations = {'tools': {'1366x768': (420,32)},
+                  'system_utils': {'1366x768': (484,181)},
+                  'admin_utils': {'1366x768': (785,609)},
+                  'fin_utils': {'1366x768': (103,665)},
+                  'change_net_account': {'1366x768': (786, 503)},
+                  'file_maint': {'1366x768': (353, 33)},
+                  'profiles': {'1366x768': (349,57)},
+                  'combine_2_profiles': {'1366x768': (579,325)},
+                  }
+
+def click_item(menu_item, screen_res = screen_res, menu_locations=menu_locations):
+    """
+    Given a menu item name, click the mouse at the x,y coords
+    :param menu_item:
+    :return:
+    """
+    x,y = menu_locations[menu_item][screen_res]
+    bot.click(x,y)
+    time.sleep(.5)
+    return True
 
 def merge_profiles(copy_from_id, copy_to_id):
     """
@@ -16,18 +42,13 @@ def merge_profiles(copy_from_id, copy_to_id):
     """
 
     # Click File Maint
-    if gt.click_pic(r'img/fims_menu_File_Maintenance.png', sleep=1,
-                    logging=True) is None:
-        gt.click_pic(r'img/fims_menu_File_Maintenance_selected.png', sleep=1,
-                     logging=True)
+    click_item('file_maint')
 
     # Click "File Maintenance" -> "Profiles"
-    gt.click_pic(r'img/fims_file_maint_profiles.png', sleep=1,
-                 logging=True)
+    click_item('profiles')
 
     # Click "Combine 2 Profiles"
-    gt.click_pic(r'img/fims_filemaint_profile_combine2.png', sleep=1,
-                 logging=True)
+    click_item('combine_2_profiles')
 
     bot.typewrite(copy_from_id)
 
@@ -64,8 +85,8 @@ def merge_profiles(copy_from_id, copy_to_id):
     for i in range(5):
         print('Checking for "profiles combined" box')
         xy = bot.locateCenterOnScreen(
-            'img/message_box_profiles_combined.png', grayscale=True,
-             region = (0,0, 3840, 2160))
+            'img/message_box_profiles_combined_1366x768.png', grayscale=True,
+             region = (609, 320, 761, 455))
         if xy is not None:  # Then merge is complete
             bot.press('enter')
             print('Merged ' + copy_from_id + ' into ' + copy_to_id)
@@ -84,7 +105,7 @@ def merge_profiles(copy_from_id, copy_to_id):
 
 time.sleep(5)
 
-merge_to = '31863'
-copy_froms = ['28850', '36083']
+merge_to = '47229'
+copy_froms = ['28850', '38044', '28073']
 for copy in copy_froms:
     merge_profiles(copy, merge_to)
