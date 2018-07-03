@@ -7,9 +7,10 @@ import pyautogui as bot
 import pandas as pd
 import xlrd
 import time
+from datetime import datetime
 import yrdata
 
-bot.FAILSAFE = False # disables the fail-safe
+# bot.FAILSAFE = False # disables the fail-safe
 
 screen_res = str(bot.size()[0]) + 'x' + str(bot.size()[1])
 
@@ -95,7 +96,7 @@ def map_gl(fisc_yr, gl_old, gl_new):
     # "Global Change for GL Natural Account" window appears - then click "Enter"
     for i in range(1000):
         print('Cycle Number ' + str(i))
-        time.sleep(5)
+        time.sleep(10)
 
         # Check to see if an error box pops up; click "OK" if it does
         gl_error_box_xy = \
@@ -120,8 +121,11 @@ def map_gl(fisc_yr, gl_old, gl_new):
 
 
 for entry in yrdata.mapping:
-    gl_yr, old_gl, new_gl = entry
+    fisc_yr, gl_old, gl_new = entry
     # gl_yr = entry[0]
     # old_gl = entry[1]
     # new_gl = entry[2]
-    map_gl(fisc_yr=gl_yr, gl_old=old_gl, gl_new=new_gl)
+    time_begin = datetime.now()
+    map_gl(fisc_yr=fisc_yr, gl_old=gl_old, gl_new=gl_new)
+    print('*** mapping account ' + gl_old + ' to ' + gl_new +
+          ' took ' + str((datetime.now()-time_begin)/60) + ' minutes')
