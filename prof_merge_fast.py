@@ -73,7 +73,7 @@ def merge_profiles(copy_from_id, copy_to_id):
     bot.press('enter')  # Clicks/selects the "yes" button
 
     print('Sleeping for 5 seconds')
-    time.sleep(.5)
+    time.sleep(.6)
 
     # Choose "yes" on the "Ready to Proceed" window
     bot.press('tab')    # Toggles from "No" selected to "Yes:
