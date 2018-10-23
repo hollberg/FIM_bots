@@ -103,12 +103,12 @@ def merge_profiles(copy_from_id, copy_to_id):
 
 time.sleep(5)
 
-from_tos = [('44502', '37457'),
-            ('55654', '45309')]
+from_tos = [('43871', '28799'),
+     ]
 
 
-for to_merge in from_tos:
-    merge_from, merge_to = to_merge
+for from_to in from_tos:
+    merge_from, merge_to = from_to
     print(f'merge {merge_from} to {merge_to}')
     merge_profiles(merge_from, merge_to)
 

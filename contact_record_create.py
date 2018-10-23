@@ -2,7 +2,6 @@
 Read data from external file; build a contact record in FIMS
 Follow toolbar path:
 View -> Contacts ->
-
 """
 #Imports
 # Standard Library
@@ -26,9 +25,8 @@ def new_contact(fims_id:str,
                 contact_comment:str = None, contact_grant:str = None):
     """
     From a full-screen FIMS launch screen, open and populate a new Contact record
-    :return:
+    :return: None
     """
-
     # Select "View" -> "Contacts" menu path via Alt-V -> "C" -> <enter>
     bot.hotkey('alt', 'v')
     time.sleep(.2)
@@ -45,88 +43,51 @@ def new_contact(fims_id:str,
     time.sleep(2)
 
     # New Contact record window launches with "Grant" field highlighted.
-    # tab twice to get to FIMS ID
-    gt.tab_then_type(2, fims_id)
-
-    #Tab 4 times to get to "Tickle Date"
-    gt.tab_then_type(4, tickle_date)
-
-    # Tab to get to 'Tickle Who'
-    gt.tab_then_type(1, tickle_who)
-
-    # Tab to get to contact date
-    gt.tab_then_type(1, contact_date)
-
-    # Tab to get to Next Action (date)
-    gt.tab_then_type(1, next_action)
-
-    # Tab once to get to Contact Type
-    gt.tab_then_type(1, contact_type)
-
-    # Tab to get to Time
-    gt.tab_then_type(1, contact_time)
-
-    # Tab to get to priority
-    gt.tab_then_type(1, contact_priority)
-
-    # Tab **3 times** to get to solicitor
-    gt.tab_then_type(3, solicitor)
-
-    # Tab to get to staff
-    gt.tab_then_type(1, staff)
-
-    # Tab to get to fund
-    gt.tab_then_type(1, fund)
-
-    # Tab to get to comment
-    gt.tab_then_type(1, contact_comment)
-
-    # Tab to get to grant
-    # gt.tab_then_type(1, contact_grant)
+    gt.tab_then_type(2, fims_id)    # tab twice to get to FIMS ID
+    gt.tab_then_type(4, tickle_date)    # Tab 4 times to get to "Tickle Date"
+    gt.tab_then_type(1, tickle_who) # Tab to get to 'Tickle Who'
+    gt.tab_then_type(1, contact_date)   # Tab to get to contact date
+    gt.tab_then_type(1, next_action)    # Tab to get to Next Action (date)
+    gt.tab_then_type(1, contact_type)   # Tab once to get to Contact Type
+    gt.tab_then_type(1, contact_time)   # Tab to get to Time
+    gt.tab_then_type(1, contact_priority)   # Tab to get to priority
+    gt.tab_then_type(3, solicitor)  # Tab **3 times** to get to solicitor
+    gt.tab_then_type(1, staff)  # Tab to get to staff
+    gt.tab_then_type(1, fund)   # Tab to get to fund
+    gt.tab_then_type(1, contact_comment)    # Tab to get to comment
+    # gt.tab_then_type(1, contact_grant)    # Tab to get to grant
 
     # Click the save (floppy disk) icon
     gt.click_pic(IMG_DIR + 'new_contact_save_icon.png')
-
-    # Wait for "Save (Y/N)" window to appear
     time.sleep(1)
 
-    # Select "File" -> Close Tab via "Alt" -> F -> F -> <enter>
+    # Select "File" -> Close Tab via "Alt" -> F -> F -> <Alt-F4>
     bot.press(['alt', 'f', 'f', 'enter'], interval=1)
     bot.hotkey('alt', 'f4')
 
     # Cleanup - Move mouse to lower left corner)
     bot.moveTo(0, bot.size()[1])
+    return None
 
-
-def get_contact_data(file_path):
-    """
-    Read Excel file with contact import data
-    :param file_path:
-    :return:
-    """
-    df_contacts = pd.read_excel(file_path)
-    # print(df_contacts.columns)
-    return df_contacts
 
 def main():
     time.sleep(2)
 
     contact_filepath = r'P:\03_FinanceOperations\InformationManagement\Databases\FIM_Bots_data'
-    contact_file = r'FIM_Bots_contacts_20180926.xlsx'
-    df_contacts = get_contact_data(contact_filepath + r'\\' + contact_file)
+    contact_file = r'FIM_Bots_contacts_richardReeves_20181023.xlsx'
+    df_contacts = pd.read_excel(contact_filepath + r'\\' + contact_file)
+    df_contacts.fillna('', inplace=True)
 
     for index, row in df_contacts.iterrows():
         fims_id = str(row['FIMSID'])
         staff = row['StaffCode']
-        contact_comment = '<Cleanup of Donor "Comment" field - MMH - 20180927>' + '\n' + \
+        contact_comment = '<Bulk entry of event attendance - MMH - 20181019>' + '\n' + \
                           gt.clean_text(row['Comment']) #Strip special chars
         contact_type = row['CntctType']
         eff_date = pd.to_datetime(row['EffDate'])
         contact_date = f'{str(eff_date.month)}/{str(eff_date.day)}/{str(eff_date.year)}'
 
-
         print(f'preparing to load for {fims_id}')
-        # print(contact_comment)
 
         new_contact(fims_id=fims_id, staff=staff, contact_type=contact_type,
                     contact_date=contact_date, contact_comment=contact_comment)
@@ -134,22 +95,5 @@ def main():
         time.sleep(2)
 
 
-
-
-    # new_contact(fims_id = '52545', contact_type='COTH', tickle_date='1/1/2018',
-    #             solicitor='CMTG', staff='MH', fund='2004',
-    #             contact_comment = r"""Now there buddy!
-    #             What's your name?
-    #
-    #             I just skipped two lines.
-    #             Now I'm done""")
-    #
-    # new_contact(fims_id='52545', contact_type='COTH', tickle_date='1/1/2018',
-    #             solicitor='CMTG', staff='MH', fund='2004',
-    #             contact_comment=r"""Now there buddy!
-    #             What's your name?
-    #
-    #             I just skipped two lines.
-    #             Now I'm done""")
-
 main()
+

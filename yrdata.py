@@ -206,3 +206,18 @@ mapping = [
     (2017, '69820', '68053'),
     (2017, '71000', '65190')
 ]
+
+# print(dir("hello"))
+
+thing = '	'
+tabber = '\t'
+print(thing == tabber)
+
+squatty = '	'
+print(thing is squatty)
+tabber_ascii = ord(tabber)
+squatty_ascii = ord(squatty)
+print(f'tabber asciii is {str(tabber_ascii)}')
+print(f'squatty ascii is {str(squatty_ascii)}')
+print(str(len(squatty)))
+print(str(len(tabber)))
