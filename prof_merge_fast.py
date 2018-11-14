@@ -103,8 +103,10 @@ def merge_profiles(copy_from_id, copy_to_id):
 
 time.sleep(5)
 
-from_tos = [('43871', '28799'),
+from_tos = [('54019', '28076'),
+            ('43962', '23474'),
      ]
+
 
 
 for from_to in from_tos:
