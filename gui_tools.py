@@ -84,6 +84,7 @@ def tab_then_type(tab_count:int = 1, input_value:str=None):
     press_x_times('tab', tab_count, interval=1)
     if input_value:
         bot.typewrite(input_value)
+        print(str(input_value))
 
     return None
 
