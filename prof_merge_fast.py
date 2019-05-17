@@ -5,68 +5,44 @@ import pyautogui as bot
 import pandas as pd
 import xlrd
 import time
-import gui_tools as gt
+import gui_tools
 
 screen_res = str(bot.size()[0]) + 'x' + str(bot.size()[1])
 
-# Dict of dicts, storing (x,y) location of menu item for a given screen
-# resolution (assumes FIMS is running at full screen).
-# Format is: {'MENU LOCATION': {ScreenResolution: (X,Y)}}
-menu_locations = {'tools': {'1366x768': (420,32)},
-                  'system_utils': {'1366x768': (484,181)},
-                  'admin_utils': {'1366x768': (785,609)},
-                  'fin_utils': {'1366x768': (103,665)},
-                  'change_net_account': {'1366x768': (786, 503)},
-                  'file_maint': {'1366x768': (353, 33)},
-                  'profiles': {'1366x768': (349,57)},
-                  'combine_2_profiles': {'1366x768': (579,325)},
-                  }
-
-def click_item(menu_item, screen_res = screen_res, menu_locations=menu_locations):
-    """
-    Given a menu item name, click the mouse at the x,y coords
-    :param menu_item:
-    :return:
-    """
-    x,y = menu_locations[menu_item][screen_res]
-    bot.click(x,y)
-    time.sleep(.5)
-    return True
 
 def merge_profiles(copy_from_id, copy_to_id):
     """
-
     :param copy_from_id:
     :param copy_to_id:
     :return:
     """
 
     # Click File Maint
-    click_item('file_maint')
+    #click_item('file_maint')
+    bot.press('alt', interval=.1)
+    bot.press('f', interval=.1)
 
     # Click "File Maintenance" -> "Profiles"
-    click_item('profiles')
+    #click_item('profiles')
+    bot.press('enter', interval=.1)
 
-    # Click "Combine 2 Profiles"
-    click_item('combine_2_profiles')
+    # click_item('combine_2_profiles')
+    gui_tools.press_x_times('c', 3, .2)    # Press "C" 3 times
 
+    bot.press('enter', interval=1)
+    time.sleep(3)
+
+    # Enter "From", then "To" FIMS IDs to merge
     bot.typewrite(copy_from_id)
 
     # Tab to next entry
-    bot.press('tab')
+    bot.press('tab', interval=.5)
 
-    time.sleep(.5)
+    bot.typewrite(copy_to_id, interval=.5)
 
-    bot.typewrite(copy_to_id)
-    time.sleep(.5)
+    gui_tools.press_x_times('tab', 2, .25)  # Press 'tab' twice
 
-    bot.press('tab')
-    bot.press('tab')
-    time.sleep(.5)
-
-    bot.press('enter')  # Selects "OK" button
-
-    time.sleep(1)
+    bot.press('enter', interval=1)  # Selects "OK" button
 
     #Do you want to delete copy from?
     bot.press('tab')    # Toggles from "No" selected to "Yes:
@@ -82,39 +58,31 @@ def merge_profiles(copy_from_id, copy_to_id):
     # Wait/check until the window labeled "Message" with text
     # "Profiles Combined!" appears. Then click "OK
     time.sleep(30)
-    for i in range(5):
+    for i in range(20):
         print('Checking for "profiles combined" box')
         xy = bot.locateCenterOnScreen(
-            'img/message_box_profiles_combined_1366x768.png', grayscale=True,
-             region = (609, 320, 761, 455))
+            'img/message_box_profiles_combined_1920x1080.png', grayscale=True)
         if xy is not None:  # Then merge is complete
             bot.press('enter')
             print('Merged ' + copy_from_id + ' into ' + copy_to_id)
-            return True
-            # break   # Exit loop
+            break   # Exit loop
         else:
             time.sleep(30)
+        # time.sleep(45)
 
 
     # Click "OK"
     bot.press('enter')
     return True
 
+time.sleep(3)
 
-time.sleep(5)
+# Read in Excel file of "From->To" mappings
+FROM_TO_FILE = r'P:\03_FinanceOperations\InformationManagement\Data Quality\MergeTemplates\to_merge.xlsx'
+df_from_to = pd.read_excel(FROM_TO_FILE)
 
-from_tos = [('54019', '28076'),
-            ('43962', '23474'),
-     ]
-
-
-
-for from_to in from_tos:
-    merge_from, merge_to = from_to
-    print(f'merge {merge_from} to {merge_to}')
-    merge_profiles(merge_from, merge_to)
-
-# merge_to = '39432'
-# copy_froms = ['44570']
-# for copy in copy_froms:
-#     merge_profiles(copy, merge_to)
+for index, row in df_from_to.iterrows():
+    from_id = str(row.From_ID)
+    to_id = str(row.To_ID)
+    print(f'Merging id {from_id} to id -> {to_id}')
+    merge_profiles(from_id, to_id)
