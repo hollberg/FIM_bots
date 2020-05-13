@@ -1,0 +1,112 @@
+"""
+statement_uploader.py
+Uploads donor statement zip files to
+https://www.edonorcentral.com/admin_statement_upload.asp
+"""
+
+# *** IMPORTS ***
+# External
+from selenium import webdriver # https://chromedriver.chromium.org/
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+import pyautogui as bot
+import cv2  # Required for "confidence" in pyautogui.locateOnScreen
+
+# Standard Library
+import time
+import os
+
+# *** VARIABLE DECLARATIONS ***
+login_url = r'https://www.edonorcentral.com/login.asp'
+upload_url = r'https://www.edonorcentral.com/admin_statement_uploadform.asp'
+user_id = '<MY_DONOR_CENTRAL_USERID>'
+password = '<MY_DONOR_CENTRAL_PASSWORD>'
+folder_path = \
+    r'N:\found\eAdvisor\Statements\DonorCentral\2020Q1'
+processed_files_folder = r'processed'   # Move processed files here
+driver = webdriver.Chrome()
+
+# *** FUNCTION DEFINITIONS ***
+def click_pic(path_to_image):
+    """
+    click_pick: Given an path to a screenshot image, find image location
+    on screen and click it.
+    :param path_to_image:
+    :return: T/F depending on success.
+    """
+    xy = bot.locateCenterOnScreen(path_to_image, confidence=0.7)
+    if xy is None:
+        print(f'{path_to_image} not found')
+        return False
+    else:
+        bot.click(xy)
+    return True
+
+
+# *** PROGRAM FLOW ***
+# ** STEP 1: Navigate to login screen **
+driver.get(login_url)
+
+# Enter username, password, click "Submit" button
+time.sleep(1)
+driver.find_element_by_id('userid').send_keys(user_id)
+time.sleep(1)
+driver.find_element_by_id('pwd').send_keys(password)
+time.sleep(.5)
+driver.find_element_by_id('submit').click() # Click "Submit" button
+time.sleep(1)
+
+# Create folder for processed files if it does not exist
+if not os.path.isdir(f'{folder_path}\{processed_files_folder}'):
+    os.mkdir(f'{folder_path}\{processed_files_folder}')
+
+# Generate List of files in {folder_path}
+# stackoverflow.com/questions/11968976
+files = [f'{folder_path}\{file}' for file in os.listdir(folder_path)
+         if os.path.isfile(os.path.join(folder_path,file))]
+
+## Uncomment below to process specific files only
+# files = [r'N:\found\eAdvisor\Statements\DonorCentral\myfile.zip']
+
+for file in files:
+    # ** STEP 2: Navigate to upload screen **
+    driver.get(upload_url)
+    time.sleep(5)
+
+    result = click_pic('choose_file3.png')
+    if not result:  # Couldn't find button - maybe mouse is covering it
+        print(f"Couldn't find \"Choose file\" image, moving mouse / retrying")
+        bot.moveRel(50, 50)
+        result = click_pic('choose_file3.png')
+    time.sleep(5)
+
+    bot.typewrite(file)
+    time.sleep(1)
+    bot.press('enter')
+    time.sleep(5)
+
+
+
+    # ** STEP X: Click "Upload Statements" submit
+    driver.find_elements_by_xpath(
+        "//form//input[@value='Upload Statements!']")[0].submit()
+
+    time.sleep(10)
+
+    print(f'Capturing: {file}')
+    try:
+        print(f'{driver.find_elements_by_xpath("//table//table//table")[0].text}')
+    except:
+        print(f'Could not print - {file}')
+        pass
+    time.sleep(5)
+
+    # Submit the upload
+    driver.find_elements_by_xpath(
+        "//form//input[@value='Upload Statements to the Database']")[0].submit()
+
+    # Move file to folder for processed files
+    source_directory, filename = os.path.split(file)
+    os.rename(file, f'{folder_path}\\{processed_files_folder}\\{filename}' )
+
+driver.close()
